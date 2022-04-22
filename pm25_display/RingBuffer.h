@@ -28,6 +28,8 @@ public:
   Record Latest() { return records_[latest_]; }
 
   // Returns the average of all values younger than maxAgeMs.
+  //
+  // If no values apply, returns 0.
   T Average(unsigned long max_age_ms) {
     T sum = 0;
     int count = 0;
@@ -44,6 +46,10 @@ public:
       if (i == latest_) {
         break;
       }
+    }
+
+    if (count == 0) {
+      return 0;
     }
     return sum / count;
   }
