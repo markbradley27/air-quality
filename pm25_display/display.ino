@@ -18,9 +18,7 @@ void displayAvgAqi() {
   }
 }
 
-void displayRect() {
-  display.drawRect(0, 16, 62, 33, SSD1306_WHITE);
-}
+void displayRect() { display.drawRect(0, 16, 62, 33, SSD1306_WHITE); }
 
 void displayWhenText() {
   unsigned long timeSinceLastData = millis() - aqi.at_millis;
@@ -46,9 +44,9 @@ void displayWhenText() {
 void displayAQI() {
   uint16_t aqiValue = aqi.value >= 1000 ? 999 : aqi.value;
   screen.textSize(3)
-        .x(aqiValue < 10 ? 25 : aqiValue < 100 ? 15 : 5)
-        .y(21)
-        .println(aqiValue);
+      .x(aqiValue < 10 ? 25 : aqiValue < 100 ? 15 : 5)
+      .y(21)
+      .println(aqiValue);
 }
 
 void displayNiceMessage() {

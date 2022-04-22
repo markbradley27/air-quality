@@ -5,10 +5,8 @@ struct Aqi {
 
 // A ring buffer of AQI values.
 class AqiBuffer {
- public:
-  AqiBuffer(int size) {
-    aqis.resize(size);
-  }
+public:
+  AqiBuffer(int size) { aqis.resize(size); }
 
   // Inserts a new value, overwriting the oldest value if the ring buffer is
   // full.
@@ -26,7 +24,8 @@ class AqiBuffer {
     int count = 0;
     int i = latest;
     unsigned long now_millis = millis();
-    while (aqis[i].at_millis != 0 && now_millis - aqis[i].at_millis < max_age_ms) {
+    while (aqis[i].at_millis != 0 &&
+           now_millis - aqis[i].at_millis < max_age_ms) {
       sum += aqis[i].value;
       ++count;
 
@@ -40,7 +39,7 @@ class AqiBuffer {
     return sum / count;
   }
 
- private:
+private:
   std::vector<Aqi> aqis;
   int latest = 0;
 };

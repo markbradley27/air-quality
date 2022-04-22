@@ -1,16 +1,17 @@
-#include "config.h"
 #include "Adafruit_PM25AQI.h"
-#include <SoftwareSerial.h>
-#include <SPI.h>
-#include <Wire.h>
+#include "config.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <SPI.h>
+#include <SoftwareSerial.h>
+#include <Wire.h>
 
 #include "Aqi.h"
 #include "Timer.h"
 
-#define UPDATE_INTERVAL_SECONDS 5  // Every X seconds, read sensor and update screen
-#define NUM_AQI_VALUES 120  // 10min * (60s / UPDATE_INTERVAL_SECONDS)
+// Every X seconds, read sensor and update screen
+#define UPDATE_INTERVAL_SECONDS 5
+#define NUM_AQI_VALUES 120 // 10min * (60s / UPDATE_INTERVAL_SECONDS)
 
 // AQI sensor
 SoftwareSerial aqi_serial(2, 3);
@@ -19,10 +20,11 @@ AqiBuffer aqi_values(NUM_AQI_VALUES);
 Aqi aqi;
 
 // OLED screen
-#define SCREEN_WIDTH    128   // OLED display width, in pixels
-#define SCREEN_HEIGHT   64    // OLED display height, in pixels
-#define OLED_RESET      -1    // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS  0x3C  ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define OLED_RESET -1    // Reset pin # (or -1 if sharing Arduino reset pin)
+// See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+#define SCREEN_ADDRESS 0x3C
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Timers
