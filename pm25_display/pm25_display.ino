@@ -7,6 +7,7 @@
 #include <Wire.h>
 
 #include "Aqi.h"
+#include "RingBuffer.h"
 #include "Timer.h"
 
 // Every X seconds, read sensor and update screen
@@ -16,7 +17,7 @@
 // AQI sensor
 SoftwareSerial aqi_serial(2, 3);
 Adafruit_PM25AQI aqi_sensor = Adafruit_PM25AQI();
-AqiBuffer aqi_values(NUM_AQI_VALUES);
+RingBuffer<uint16_t> aqi_values(NUM_AQI_VALUES);
 Aqi aqi;
 
 // OLED screen
@@ -48,7 +49,7 @@ void loop() {
 
     ReadAqiSensor();
     if (aqi.at_millis != 0) {
-      aqi_values.insert(aqi);
+      aqi_values.Insert(aqi.value, aqi.at_millis);
     }
 
     displayNowAqi();

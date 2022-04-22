@@ -12,7 +12,7 @@ void displayAvgAqi() {
   screen = screen.textSize(2).x(70).y(24);
 
   if (timer_start_avg.complete()) {
-    screen.println(aqi_values.average(minutes(10)));
+    screen.println(aqi_values.Average(minutes(10)));
   } else {
     screen.println("--");
   }
