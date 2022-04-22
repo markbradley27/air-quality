@@ -14,6 +14,14 @@
 #define UPDATE_INTERVAL_SECONDS 5
 #define NUM_BUFFERED_VALUES 120 // 10min * 60s / UPDATE_INTERVAL_SECONDS
 
+// OLED screen
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define OLED_RESET -1    // Reset pin # (or -1 if sharing Arduino reset pin)
+// See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+#define SCREEN_ADDRESS 0x3C
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
 // AQI sensor
 SoftwareSerial aqi_serial(2, 3);
 Adafruit_PM25AQI aqi_sensor = Adafruit_PM25AQI();
@@ -23,14 +31,6 @@ RingBuffer<uint16_t> aqi_values(NUM_BUFFERED_VALUES);
 DHT dht(0, DHT22);
 RingBuffer<float> temp_c_values(NUM_BUFFERED_VALUES);
 RingBuffer<float> humidity_values(NUM_BUFFERED_VALUES);
-
-// OLED screen
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-#define OLED_RESET -1    // Reset pin # (or -1 if sharing Arduino reset pin)
-// See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-#define SCREEN_ADDRESS 0x3C
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Timers
 Timer timer_read_sensor = {1000 * UPDATE_INTERVAL_SECONDS, 0};
@@ -43,7 +43,7 @@ void setup() {
   Serial.begin(115200);
   aqi_serial.begin(9600);
 
-  initDisplay();
+  InitDisplay();
   InitAqiSensor();
   dht.begin();
 }
@@ -75,6 +75,23 @@ void loop() {
     displayNowAqi();
     displayAvgAqi();
   }
+}
+
+void InitDisplay() {
+
+  if (!display.begin(
+          SSD1306_SWITCHCAPVCC, // Generate display voltage from 3.3V internally
+          SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;)
+      ; // Don't proceed, loop forever
+  }
+  display.clearDisplay();
+
+  // Show initial display buffer contents on the screen --
+  // the library initializes this with an Adafruit splash screen.
+  display.setTextColor(SSD1306_WHITE);
+  delay(2000);
 }
 
 void InitAqiSensor() {
