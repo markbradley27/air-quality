@@ -8,7 +8,7 @@
 #include <Wire.h>
 
 #include "RingBuffer.h"
-#include "Timer.h"
+#include "util.h"
 
 // Every X seconds, read sensor and update screen
 #define UPDATE_INTERVAL_SECONDS 5
@@ -49,8 +49,8 @@ void setup() {
 }
 
 void loop() {
-  if (timer_read_sensor.complete()) {
-    timer_read_sensor.reset();
+  if (timer_read_sensor.Complete()) {
+    timer_read_sensor.Reset();
 
     PM25_AQI_Data data;
     if (ReadAqiSensor(&data)) {

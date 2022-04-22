@@ -11,7 +11,7 @@ void displayAvgAqi() {
   display.drawLine(70, 16, 110, 16, SSD1306_WHITE);
   screen = screen.textSize(2).x(70).y(24);
 
-  if (timer_start_avg.complete()) {
+  if (timer_start_avg.Complete()) {
     screen.println(aqi_values.Average(minutes(10)));
   } else {
     screen.println("--");
