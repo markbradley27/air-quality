@@ -6,7 +6,6 @@
 #include <SoftwareSerial.h>
 #include <Wire.h>
 
-#include "Aqi.h"
 #include "RingBuffer.h"
 #include "Timer.h"
 
@@ -18,7 +17,6 @@
 SoftwareSerial aqi_serial(2, 3);
 Adafruit_PM25AQI aqi_sensor = Adafruit_PM25AQI();
 RingBuffer<uint16_t> aqi_values(NUM_AQI_VALUES);
-Aqi aqi;
 
 // OLED screen
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -47,9 +45,9 @@ void loop() {
   if (timer_read_sensor.complete()) {
     timer_read_sensor.reset();
 
-    ReadAqiSensor();
-    if (aqi.at_millis != 0) {
-      aqi_values.Insert(aqi.value, aqi.at_millis);
+    PM25_AQI_Data data;
+    if (ReadAqiSensor(&data)) {
+      aqi_values.Insert(data.pm25_standard, millis());
     }
 
     displayNowAqi();
@@ -72,7 +70,7 @@ void InitAqiSensor() {
   Serial.println("PM25 found!");
 }
 
-void ReadAqiSensor() {
+bool ReadAqiSensor(PM25_AQI_Data *data) {
   // Clear the serial buffer.
   while (aqi_serial.available()) {
     aqi_serial.read();
@@ -80,11 +78,10 @@ void ReadAqiSensor() {
 
   // Wait for a reading.
   unsigned long start_ms = millis();
-  PM25_AQI_Data data;
   while (millis() - start_ms < seconds(2)) {
-    if (aqi_sensor.read(&data)) {
-      aqi = {data.pm25_standard, millis()};
-      break;
+    if (aqi_sensor.read(data)) {
+      return true;
     }
   }
+  return false;
 }

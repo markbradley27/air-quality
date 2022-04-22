@@ -6,12 +6,13 @@
 
 // A ring buffer for storing sensor values.
 template <class T> class RingBuffer {
-private:
+public:
   struct Record {
     T value;
     unsigned long at_millis;
   };
 
+private:
   std::vector<Record> records_;
   int latest_ = 0;
 
@@ -27,6 +28,9 @@ public:
     latest_ = (latest_ + 1) % records_.size();
     records_[latest_] = {value, at_millis};
   }
+
+  // Returns the most recently inserted value.
+  Record Latest() { return records_[latest_]; }
 
   // Returns the average of all values younger than maxAgeMs.
   T Average(unsigned long max_age_ms) {
