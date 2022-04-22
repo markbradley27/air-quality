@@ -6,7 +6,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#include "AQI.h"
+#include "Aqi.h"
 #include "Timer.h"
 
 #define UPDATE_INTERVAL_SECONDS 5  // Every X seconds, read sensor and update screen
