@@ -13,17 +13,3 @@ void initDisplay() {
   delay(2000);
 }
 
-void initSensor() {
-  // Wait one second for sensor to boot up!
-  delay(1000);
-
-  // connect to the sensor over software serial
-  if (!aqiSensor.begin_UART(&pmSerial)) {
-    Serial.println("Could not find PM 2.5 sensor!");
-    while (1) {
-      delay(10);
-    }
-  }
-
-  Serial.println("PM25 found!");
-}

@@ -1,6 +1,6 @@
-struct AQI {
+struct Aqi {
   uint16_t value;
-  unsigned long atMillis;
+  unsigned long at_millis;
 };
 
 // A ring buffer of AQI values.
@@ -15,18 +15,18 @@ class AqiBuffer {
   //
   // Inserted values should always be younger than all values already in
   // the buffer.
-  void insert(AQI newAqi) {
+  void insert(Aqi new_aqi) {
     latest = (latest + 1) % aqis.size();
-    aqis[latest] = newAqi;
+    aqis[latest] = new_aqi;
   }
 
   // Returns the average of all values younger than maxAgeMs.
-  int average(unsigned long maxAgeMs) {
+  int average(unsigned long max_age_ms) {
     int sum = 0;
     int count = 0;
     int i = latest;
-    unsigned long nowMillis = millis();
-    while (aqis[i].atMillis != 0 && nowMillis - aqis[i].atMillis < maxAgeMs) {
+    unsigned long now_millis = millis();
+    while (aqis[i].at_millis != 0 && now_millis - aqis[i].at_millis < max_age_ms) {
       sum += aqis[i].value;
       ++count;
 
@@ -41,6 +41,6 @@ class AqiBuffer {
   }
 
  private:
-  std::vector<AQI> aqis;
+  std::vector<Aqi> aqis;
   int latest = 0;
 };

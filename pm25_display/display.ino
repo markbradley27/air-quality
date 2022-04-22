@@ -11,8 +11,8 @@ void displayAvgAqi() {
   display.drawLine(70, 16, 110, 16, SSD1306_WHITE);
   screen = screen.textSize(2).x(70).y(24);
 
-  if (timerStartAvg.complete()) {
-    screen.println(aqiValues.average(minutes(10)));
+  if (timer_start_avg.complete()) {
+    screen.println(aqi_values.average(minutes(10)));
   } else {
     screen.println("--");
   }
@@ -23,7 +23,7 @@ void displayRect() {
 }
 
 void displayWhenText() {
-  unsigned long timeSinceLastData = millis() - aqi.atMillis;
+  unsigned long timeSinceLastData = millis() - aqi.at_millis;
 
   if (timeSinceLastData < seconds(10)) {
     screen.textSize(1).x(25).y(8).println("Now");

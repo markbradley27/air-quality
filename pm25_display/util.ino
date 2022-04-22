@@ -1,7 +1,3 @@
-void copyArray(AQI* src, AQI* dst, int len) {
-  memcpy(dst, src, sizeof(src[0]) * len);
-}
-
 unsigned long seconds(int s) {
   return s * 1000;
 }
