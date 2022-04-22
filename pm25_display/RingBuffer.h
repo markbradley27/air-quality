@@ -12,11 +12,6 @@ public:
     unsigned long at_millis;
   };
 
-private:
-  std::vector<Record> records_;
-  int latest_ = 0;
-
-public:
   RingBuffer(int size) { records_.resize(size); }
 
   // Inserts a new value, overwriting the oldest value if the ring buffer is
@@ -52,6 +47,10 @@ public:
     }
     return sum / count;
   }
+
+private:
+  std::vector<Record> records_;
+  int latest_ = 0;
 };
 
 #endif
