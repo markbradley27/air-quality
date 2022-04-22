@@ -11,3 +11,7 @@ int msToMinutes(unsigned long ms) { return ms / 1000 / 60; }
 int msToHours(unsigned long ms) { return ms / 1000 / 60 / 60; }
 
 int msToDays(unsigned long ms) { return ms / 1000 / 60 / 60 / 24; }
+
+float CToF(float celsius) { return celsius * 1.8 + 32; }
+
+float FToC(float fahrenheit) { return (fahrenheit - 32) / 1.8; }

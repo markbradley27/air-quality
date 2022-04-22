@@ -1,4 +1,5 @@
 #include "Adafruit_PM25AQI.h"
+#include "DHT.h"
 #include "config.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -11,12 +12,17 @@
 
 // Every X seconds, read sensor and update screen
 #define UPDATE_INTERVAL_SECONDS 5
-#define NUM_AQI_VALUES 120 // 10min * (60s / UPDATE_INTERVAL_SECONDS)
+#define NUM_BUFFERED_VALUES 120 // 10min * 60s / UPDATE_INTERVAL_SECONDS
 
 // AQI sensor
 SoftwareSerial aqi_serial(2, 3);
 Adafruit_PM25AQI aqi_sensor = Adafruit_PM25AQI();
-RingBuffer<uint16_t> aqi_values(NUM_AQI_VALUES);
+RingBuffer<uint16_t> aqi_values(NUM_BUFFERED_VALUES);
+
+// DHT22 Temp/Humidity sensor
+DHT dht(0, DHT22);
+RingBuffer<float> temp_c_values(NUM_BUFFERED_VALUES);
+RingBuffer<float> humidity_values(NUM_BUFFERED_VALUES);
 
 // OLED screen
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -39,6 +45,7 @@ void setup() {
 
   initDisplay();
   InitAqiSensor();
+  dht.begin();
 }
 
 void loop() {
@@ -49,6 +56,20 @@ void loop() {
     if (ReadAqiSensor(&data)) {
       aqi_values.Insert(data.pm25_standard, millis());
       Serial.println("AQI: " + String(aqi_values.Latest().value));
+    }
+
+    float temp_c = dht.readTemperature();
+    if (!isnan(temp_c)) {
+      temp_c_values.Insert(temp_c, millis());
+      Serial.println("Temp: " + String(temp_c_values.Latest().value) + "°C, " +
+                     String(CToF(temp_c_values.Latest().value)) + "°F");
+    }
+
+    float humidity = dht.readHumidity();
+    if (!isnan(humidity)) {
+      humidity_values.Insert(humidity, millis());
+      Serial.println("Humidity: " + String(humidity_values.Latest().value) +
+                     "%");
     }
 
     displayNowAqi();
