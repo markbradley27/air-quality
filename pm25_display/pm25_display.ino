@@ -48,6 +48,7 @@ void loop() {
     PM25_AQI_Data data;
     if (ReadAqiSensor(&data)) {
       aqi_values.Insert(data.pm25_standard, millis());
+      Serial.println("AQI: " + String(aqi_values.Latest().value));
     }
 
     displayNowAqi();

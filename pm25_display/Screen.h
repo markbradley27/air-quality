@@ -22,13 +22,11 @@ struct Screen {
   }
 
   void print(auto str) {
-    Serial.print(str);
     display.print(str);
     display.display();
   }
 
   void println(auto str) {
-    Serial.println(str);
     display.println(str);
     display.display();
   }
