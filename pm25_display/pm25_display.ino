@@ -1,13 +1,13 @@
 #include "Adafruit_PM25AQI.h"
 #include "DHT.h"
 #include "config.h"
-#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <SPI.h>
 #include <SoftwareSerial.h>
 #include <Wire.h>
 
 #include "RingBuffer.h"
+#include "displayers/AqiDisplayer.h"
+#include "displayers/Displayer.h"
 #include "util.h"
 
 // Every X seconds, read sensor and update screen
@@ -34,10 +34,9 @@ RingBuffer<float> humidity_values(NUM_BUFFERED_VALUES);
 
 // Timers
 Timer timer_read_sensor = {1000 * UPDATE_INTERVAL_SECONDS, 0};
-Timer timer_start_avg = {1000 * 60 * 10, 0}; // 10 minutes
 
-#include "Screen.h"
-Screen screen;
+// Displayers
+Displayer *displayer = new AqiDisplayer(&display, &aqi_values);
 
 void setup() {
   Serial.begin(115200);
@@ -46,6 +45,8 @@ void setup() {
   InitDisplay();
   InitAqiSensor();
   dht.begin();
+
+  displayer->Refresh();
 }
 
 void loop() {
@@ -72,8 +73,7 @@ void loop() {
                      "%");
     }
 
-    displayNowAqi();
-    displayAvgAqi();
+    displayer->Update();
   }
 }
 

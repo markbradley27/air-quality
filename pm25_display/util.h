@@ -1,3 +1,6 @@
+#ifndef util_h
+#define util_h
+
 unsigned long seconds(int s) { return s * 1000; }
 
 unsigned long minutes(int m) { return m * 1000 * 60; }
@@ -22,3 +25,5 @@ struct Timer {
   void Reset() { last_cycle_time = millis(); };
   bool Complete() { return (millis() - last_cycle_time) > total_cycle_time; };
 };
+
+#endif util_h
