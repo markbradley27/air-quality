@@ -6,7 +6,7 @@
 #include <Wire.h>
 
 #include "RingBuffer.h"
-#include "displayers/AqiDisplayer.h"
+#include "displayers/AqiTempHumidDisplayer.h"
 #include "displayers/Displayer.h"
 #include "util.h"
 
@@ -36,7 +36,8 @@ RingBuffer<float> humidity_values(NUM_BUFFERED_VALUES);
 Timer timer_read_sensor = {1000 * UPDATE_INTERVAL_SECONDS, 0};
 
 // Displayers
-Displayer *displayer = new AqiDisplayer(&display, &aqi_values);
+Displayer *displayer = new AqiTempHumidDisplayer(
+    &display, &aqi_values, &temp_c_values, &humidity_values);
 
 void setup() {
   Serial.begin(115200);
