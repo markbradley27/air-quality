@@ -58,13 +58,19 @@ private:
   }
 
   void UpdateTemp() {
-    UpdateRow(1, "Temp:", String(CToF(temp_c_values_->Latest().value)).c_str(),
-              String(CToF(temp_c_values_->Average(minutes(10)))).c_str());
+    char temp_now_str[6];
+    sprintf(temp_now_str, "%.1fF", CToF(temp_c_values_->Latest().value));
+    char temp_avg_str[6];
+    sprintf(temp_avg_str, "%.1fF", CToF(temp_c_values_->Average(minutes(10))));
+    UpdateRow(1, "Temp:", temp_now_str, temp_avg_str);
   }
 
   void UpdateHumidity() {
-    UpdateRow(2, "Humid:", String(humidity_values_->Latest().value).c_str(),
-              String(humidity_values_->Average(minutes(10))).c_str());
+    char humid_now_str[6];
+    sprintf(humid_now_str, "%.1f%%", humidity_values_->Latest().value);
+    char humid_avg_str[6];
+    sprintf(humid_avg_str, "%.1f%%", humidity_values_->Average(minutes(10)));
+    UpdateRow(2, "Humid:", humid_now_str, humid_avg_str);
   }
 
   void UpdateAqi() {
