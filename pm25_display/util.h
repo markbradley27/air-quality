@@ -1,22 +1,17 @@
 #ifndef util_h
 #define util_h
 
+// Time helpers
 unsigned long seconds(int s) { return s * 1000; }
-
 unsigned long minutes(int m) { return m * 1000 * 60; }
-
 unsigned long hours(int h) { return h * 1000 * 60 * 60; }
-
 int msToSeconds(unsigned long ms) { return ms / 1000; }
-
 int msToMinutes(unsigned long ms) { return ms / 1000 / 60; }
-
 int msToHours(unsigned long ms) { return ms / 1000 / 60 / 60; }
-
 int msToDays(unsigned long ms) { return ms / 1000 / 60 / 60 / 24; }
 
+// Temp helpers
 float CToF(float celsius) { return celsius * 1.8 + 32; }
-
 float FToC(float fahrenheit) { return (fahrenheit - 32) / 1.8; }
 
 struct Timer {
