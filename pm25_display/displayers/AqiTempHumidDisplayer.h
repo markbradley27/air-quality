@@ -23,6 +23,8 @@ public:
 
   void Refresh() override {
     display_->clearDisplay();
+    display_->setTextSize(TEXT_SIZE);
+    display_->setTextColor(WHITE, BLACK);
 
     UpdateRow(0, "", "Now", "10m avg");
     UpdateTemp();
@@ -40,14 +42,12 @@ public:
   }
 
 private:
-  const int kRowYs[4] = {8, 21, 32, 43};
+  const int kRowYs[5] = {8, 21, 32, 43, 54};
 
   void UpdateRow(const int row, const char *col_0, const char *col_1,
                  const char *col_2) {
-    display_->setTextSize(TEXT_SIZE);
-    display_->setTextColor(WHITE, BLACK);
     display_->setCursor(COL_0_X, kRowYs[row]);
-    display_->print("              ");
+    display_->print("                     ");
 
     display_->setCursor(COL_0_X, kRowYs[row]);
     display_->print(col_0);
