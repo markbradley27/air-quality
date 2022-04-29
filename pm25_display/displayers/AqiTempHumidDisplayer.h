@@ -4,6 +4,7 @@
 #include <Adafruit_SSD1306.h>
 
 #include "../RingBuffer.h"
+#include "../util.h"
 #include "Displayer.h"
 
 #define TEXT_SIZE 1
