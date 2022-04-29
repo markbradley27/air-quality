@@ -89,10 +89,11 @@ void InitDisplay() {
   }
   display.clearDisplay();
 
-  // Show initial display buffer contents on the screen --
-  // the library initializes this with an Adafruit splash screen.
   display.setTextColor(SSD1306_WHITE);
-  delay(2000);
+
+  // Dim display a bit.
+  display.ssd1306_command(SSD1306_SETCONTRAST);
+  display.ssd1306_command(0x01);
 }
 
 void InitAqiSensor() {
