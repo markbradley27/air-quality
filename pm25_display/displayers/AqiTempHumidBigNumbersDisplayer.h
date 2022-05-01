@@ -70,7 +70,7 @@ private:
     display_->setCursor(10, 56);
     display_->print("    ");
     display_->setCursor(10, 56);
-    char temp_str[5];
+    char temp_str[6];
     sprintf(temp_str, "%.1f", CToF(temp_c_values_->Latest().value));
     display_->print(temp_str);
   }
