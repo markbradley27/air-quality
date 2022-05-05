@@ -16,7 +16,7 @@ float FToC(float fahrenheit) { return (fahrenheit - 32) / 1.8; }
 
 struct Timer {
   unsigned long total_cycle_time;
-  unsigned long last_cycle_time;
+  unsigned long last_cycle_time = 0;
   void Reset() { last_cycle_time = millis(); };
   bool Complete() { return (millis() - last_cycle_time) > total_cycle_time; };
 };

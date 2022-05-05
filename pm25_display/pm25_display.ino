@@ -2,6 +2,7 @@
 #include "DHT.h"
 #include "config.h"
 #include <Adafruit_SSD1306.h>
+#include <ESP8266WiFi.h>
 #include <SoftwareSerial.h>
 #include <Wire.h>
 
@@ -12,6 +13,7 @@
 
 // Every X seconds, read sensor and update screen
 #define UPDATE_INTERVAL_SECONDS 5
+#define UPLOAD_INTERVAL_MINUTES 10
 #define NUM_BUFFERED_VALUES 120 // 10min * 60s / UPDATE_INTERVAL_SECONDS
 
 // OLED screen
@@ -21,6 +23,12 @@
 // See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 #define SCREEN_ADDRESS 0x3C
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+// Wifi
+#define SSID "henrietta"
+#define PASSWORD "notgonnapayrent"
+#define HOST "192.168.138.1"
+#define PORT 42901
 
 // AQI sensor
 SoftwareSerial aqi_serial(2, 3);
@@ -37,7 +45,8 @@ RingBuffer<float> temp_c_values(NUM_BUFFERED_VALUES);
 RingBuffer<float> humidity_values(NUM_BUFFERED_VALUES);
 
 // Timers
-Timer timer_read_sensor = {1000 * UPDATE_INTERVAL_SECONDS, 0};
+Timer timer_read_sensor = {seconds(UPDATE_INTERVAL_SECONDS)};
+Timer timer_upload_data = {minutes(UPLOAD_INTERVAL_MINUTES)};
 
 // Displayers
 Displayer *displayer = new AqiTempHumidBigNumbersDisplayer(
@@ -48,6 +57,7 @@ void setup() {
   aqi_serial.begin(9600);
 
   InitDisplay();
+  InitWifi();
   InitAqiSensor();
   dht.begin();
 
@@ -80,6 +90,21 @@ void loop() {
 
     displayer->Update();
   }
+
+  if (timer_upload_data.Complete()) {
+    timer_upload_data.Reset();
+
+    WiFiClient client;
+    if (!client.connect(HOST, PORT)) {
+      Serial.println("Tried to upload data but TCP client connection failed.");
+      return;
+    }
+    client.println("Temperature: " +
+                   String(temp_c_values.Average(minutes(10))));
+    client.println("Humidity: " + String(humidity_values.Average(minutes(10))));
+    client.println("AQI: " + String(aqi_values.Average(minutes(10))));
+    client.stop();
+  }
 }
 
 void InitDisplay() {
@@ -98,6 +123,24 @@ void InitDisplay() {
   // Dim display a bit.
   display.ssd1306_command(SSD1306_SETCONTRAST);
   display.ssd1306_command(0x01);
+}
+
+void InitWifi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(SSID, PASSWORD);
+  const int timeout_millis = millis() + 7000;
+  Serial.print("Connecting to Wifi(" + String(SSID) + ")");
+  while (WiFi.status() != WL_CONNECTED && millis() < timeout_millis) {
+    Serial.print(".");
+    delay(500);
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("connected!");
+  } else {
+    Serial.println(
+        "this is taking too long, will keep trying in the background");
+  }
 }
 
 void InitAqiSensor() {
