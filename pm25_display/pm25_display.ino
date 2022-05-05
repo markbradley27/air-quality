@@ -28,6 +28,10 @@ Adafruit_PM25AQI aqi_sensor = Adafruit_PM25AQI();
 RingBuffer<uint16_t> aqi_values(NUM_BUFFERED_VALUES);
 
 // DHT22 Temp/Humidity sensor
+// Value that should be added to each temp reading.
+#define TEMP_CALIBRATION_OFFSET -3.53
+// Value that should be added to each humidity reading.
+#define HUMIDITY_CALIBRATION_OFFSET 12.28
 DHT dht(0, DHT22);
 RingBuffer<float> temp_c_values(NUM_BUFFERED_VALUES);
 RingBuffer<float> humidity_values(NUM_BUFFERED_VALUES);
@@ -60,14 +64,14 @@ void loop() {
       Serial.println("AQI: " + String(aqi_values.Latest().value));
     }
 
-    float temp_c = dht.readTemperature();
+    float temp_c = dht.readTemperature() + TEMP_CALIBRATION_OFFSET;
     if (!isnan(temp_c)) {
       temp_c_values.Insert(temp_c, millis());
       Serial.println("Temp: " + String(temp_c_values.Latest().value) + "°C, " +
                      String(CToF(temp_c_values.Latest().value)) + "°F");
     }
 
-    float humidity = dht.readHumidity();
+    float humidity = dht.readHumidity() + HUMIDITY_CALIBRATION_OFFSET;
     if (!isnan(humidity)) {
       humidity_values.Insert(humidity, millis());
       Serial.println("Humidity: " + String(humidity_values.Latest().value) +
