@@ -11,6 +11,7 @@
 #include "displayers/AqiDisplayer.h"
 #include "displayers/AqiTempHumidBigNumbersDisplayer.h"
 #include "displayers/AqiTempHumidDisplayer.h"
+#include "displayers/BlankDisplayer.h"
 #include "displayers/Displayer.h"
 #include "util.h"
 
@@ -67,9 +68,10 @@ AqiTempHumidBigNumbersDisplayer
 AqiTempHumidDisplayer aqi_temp_humid_displayer(&display, &aqi_values,
                                                &temp_c_values,
                                                &humidity_values);
-std::vector<Displayer *> displayers = {&aqi_displayer,
-                                       &aqi_temp_humid_big_numbers_displayer,
-                                       &aqi_temp_humid_displayer};
+BlankDisplayer blank_displayer(&display);
+std::vector<Displayer *> displayers = {
+    &aqi_displayer, &aqi_temp_humid_big_numbers_displayer,
+    &aqi_temp_humid_displayer, &blank_displayer};
 int displayer_i = 0;
 
 void setup() {
