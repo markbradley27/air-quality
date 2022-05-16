@@ -6,8 +6,11 @@
 #include <SoftwareSerial.h>
 #include <Wire.h>
 
+#include "Button.h"
 #include "RingBuffer.h"
+#include "displayers/AqiDisplayer.h"
 #include "displayers/AqiTempHumidBigNumbersDisplayer.h"
+#include "displayers/AqiTempHumidDisplayer.h"
 #include "displayers/Displayer.h"
 #include "util.h"
 
@@ -44,27 +47,56 @@ DHT dht(0, DHT22);
 RingBuffer<float> temp_c_values(NUM_BUFFERED_VALUES);
 RingBuffer<float> humidity_values(NUM_BUFFERED_VALUES);
 
+// Buttons
+Button right_button(D5);
+IRAM_ATTR void right_button_isr() { right_button.Isr(); }
+Button middle_button(D6);
+IRAM_ATTR void middle_button_isr() { middle_button.Isr(); }
+Button left_button(D7);
+IRAM_ATTR void left_button_isr() { left_button.Isr(); }
+
 // Timers
 Timer timer_read_sensor = {seconds(UPDATE_INTERVAL_SECONDS)};
 Timer timer_upload_data = {minutes(UPLOAD_INTERVAL_MINUTES)};
 
 // Displayers
-Displayer *displayer = new AqiTempHumidBigNumbersDisplayer(
-    &display, &aqi_values, &temp_c_values, &humidity_values);
+AqiDisplayer aqi_displayer(&display, &aqi_values);
+AqiTempHumidBigNumbersDisplayer
+    aqi_temp_humid_big_numbers_displayer(&display, &aqi_values, &temp_c_values,
+                                         &humidity_values);
+AqiTempHumidDisplayer aqi_temp_humid_displayer(&display, &aqi_values,
+                                               &temp_c_values,
+                                               &humidity_values);
+std::vector<Displayer *> displayers = {&aqi_displayer,
+                                       &aqi_temp_humid_big_numbers_displayer,
+                                       &aqi_temp_humid_displayer};
+int displayer_i = 0;
 
 void setup() {
   Serial.begin(115200);
   aqi_serial.begin(9600);
+
+  attachInterrupt(digitalPinToInterrupt(D5), right_button_isr, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(D6), middle_button_isr, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(D7), left_button_isr, CHANGE);
 
   InitDisplay();
   InitWifi();
   InitAqiSensor();
   dht.begin();
 
-  displayer->Refresh();
+  displayers[displayer_i]->Refresh();
 }
 
 void loop() {
+  const int displayer_change =
+      right_button.UnhandledPresses() - left_button.UnhandledPresses();
+  if (displayer_change != 0) {
+    displayer_i = (displayer_i + displayer_change + 3 * displayers.size()) %
+                  displayers.size();
+    displayers[displayer_i]->Refresh();
+  }
+
   if (timer_read_sensor.Complete()) {
     timer_read_sensor.Reset();
 
@@ -88,7 +120,7 @@ void loop() {
                      "%");
     }
 
-    displayer->Update();
+    displayers[displayer_i]->Update();
   }
 
   if (timer_upload_data.Complete()) {
