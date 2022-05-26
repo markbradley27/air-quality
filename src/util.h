@@ -21,4 +21,4 @@ struct Timer {
   bool Complete() { return (millis() - last_cycle_time) > total_cycle_time; };
 };
 
-#endif util_h
+#endif // util_h

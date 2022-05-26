@@ -1,4 +1,5 @@
 #include "Adafruit_PM25AQI.h"
+#include "Arduino.h"
 #include "DHT.h"
 #include "config.h"
 #include <Adafruit_SSD1306.h>
@@ -8,7 +9,6 @@
 
 #include "Button.h"
 #include "RingBuffer.h"
-#include "displayers/AqiDisplayer.h"
 #include "displayers/AqiTempHumidBigNumbersDisplayer.h"
 #include "displayers/AqiTempHumidDisplayer.h"
 #include "displayers/BlankDisplayer.h"
@@ -61,7 +61,6 @@ Timer timer_read_sensor = {seconds(UPDATE_INTERVAL_SECONDS)};
 Timer timer_upload_data = {minutes(UPLOAD_INTERVAL_MINUTES)};
 
 // Displayers
-AqiDisplayer aqi_displayer(&display, &aqi_values);
 AqiTempHumidBigNumbersDisplayer
     aqi_temp_humid_big_numbers_displayer(&display, &aqi_values, &temp_c_values,
                                          &humidity_values);
@@ -69,77 +68,10 @@ AqiTempHumidDisplayer aqi_temp_humid_displayer(&display, &aqi_values,
                                                &temp_c_values,
                                                &humidity_values);
 BlankDisplayer blank_displayer(&display);
-std::vector<Displayer *> displayers = {
-    &aqi_displayer, &aqi_temp_humid_big_numbers_displayer,
-    &aqi_temp_humid_displayer, &blank_displayer};
+std::vector<Displayer *> displayers = {&aqi_temp_humid_big_numbers_displayer,
+                                       &aqi_temp_humid_displayer,
+                                       &blank_displayer};
 int displayer_i = 0;
-
-void setup() {
-  Serial.begin(115200);
-  aqi_serial.begin(9600);
-
-  attachInterrupt(digitalPinToInterrupt(D5), right_button_isr, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(D6), middle_button_isr, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(D7), left_button_isr, CHANGE);
-
-  InitDisplay();
-  InitWifi();
-  InitAqiSensor();
-  dht.begin();
-
-  displayers[displayer_i]->Refresh();
-}
-
-void loop() {
-  const int displayer_change =
-      right_button.UnhandledPresses() - left_button.UnhandledPresses();
-  if (displayer_change != 0) {
-    displayer_i = (displayer_i + displayer_change + 3 * displayers.size()) %
-                  displayers.size();
-    displayers[displayer_i]->Refresh();
-  }
-
-  if (timer_read_sensor.Complete()) {
-    timer_read_sensor.Reset();
-
-    PM25_AQI_Data data;
-    if (ReadAqiSensor(&data)) {
-      aqi_values.Insert(data.pm25_standard, millis());
-      Serial.println("AQI: " + String(aqi_values.Latest().value));
-    }
-
-    float temp_c = dht.readTemperature() + TEMP_CALIBRATION_OFFSET;
-    if (!isnan(temp_c)) {
-      temp_c_values.Insert(temp_c, millis());
-      Serial.println("Temp: " + String(temp_c_values.Latest().value) + "°C, " +
-                     String(CToF(temp_c_values.Latest().value)) + "°F");
-    }
-
-    float humidity = dht.readHumidity() + HUMIDITY_CALIBRATION_OFFSET;
-    if (!isnan(humidity)) {
-      humidity_values.Insert(humidity, millis());
-      Serial.println("Humidity: " + String(humidity_values.Latest().value) +
-                     "%");
-    }
-
-    displayers[displayer_i]->Update();
-  }
-
-  if (timer_upload_data.Complete()) {
-    timer_upload_data.Reset();
-
-    WiFiClient client;
-    if (!client.connect(HOST, PORT)) {
-      Serial.println("Tried to upload data but TCP client connection failed.");
-      return;
-    }
-    client.println("Temperature: " +
-                   String(temp_c_values.Average(minutes(10))));
-    client.println("Humidity: " + String(humidity_values.Average(minutes(10))));
-    client.println("AQI: " + String(aqi_values.Average(minutes(10))));
-    client.stop();
-  }
-}
 
 void InitDisplay() {
 
@@ -192,6 +124,22 @@ void InitAqiSensor() {
   Serial.println("PM25 found!");
 }
 
+void setup() {
+  Serial.begin(115200);
+  aqi_serial.begin(9600);
+
+  attachInterrupt(digitalPinToInterrupt(D5), right_button_isr, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(D6), middle_button_isr, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(D7), left_button_isr, CHANGE);
+
+  InitDisplay();
+  InitWifi();
+  InitAqiSensor();
+  dht.begin();
+
+  displayers[displayer_i]->Refresh();
+}
+
 bool ReadAqiSensor(PM25_AQI_Data *data) {
   // Clear the serial buffer.
   while (aqi_serial.available()) {
@@ -206,4 +154,55 @@ bool ReadAqiSensor(PM25_AQI_Data *data) {
     }
   }
   return false;
+}
+
+void loop() {
+  const int displayer_change =
+      right_button.UnhandledPresses() - left_button.UnhandledPresses();
+  if (displayer_change != 0) {
+    displayer_i = (displayer_i + displayer_change + 3 * displayers.size()) %
+                  displayers.size();
+    displayers[displayer_i]->Refresh();
+  }
+
+  if (timer_read_sensor.Complete()) {
+    timer_read_sensor.Reset();
+
+    PM25_AQI_Data data;
+    if (ReadAqiSensor(&data)) {
+      aqi_values.Insert(data.pm25_standard, millis());
+      Serial.println("AQI: " + String(aqi_values.Latest().value));
+    }
+
+    float temp_c = dht.readTemperature() + TEMP_CALIBRATION_OFFSET;
+    if (!isnan(temp_c)) {
+      temp_c_values.Insert(temp_c, millis());
+      Serial.println("Temp: " + String(temp_c_values.Latest().value) + "°C, " +
+                     String(CToF(temp_c_values.Latest().value)) + "°F");
+    }
+
+    float humidity = dht.readHumidity() + HUMIDITY_CALIBRATION_OFFSET;
+    if (!isnan(humidity)) {
+      humidity_values.Insert(humidity, millis());
+      Serial.println("Humidity: " + String(humidity_values.Latest().value) +
+                     "%");
+    }
+
+    displayers[displayer_i]->Update();
+  }
+
+  if (timer_upload_data.Complete()) {
+    timer_upload_data.Reset();
+
+    WiFiClient client;
+    if (!client.connect(HOST, PORT)) {
+      Serial.println("Tried to upload data but TCP client connection failed.");
+      return;
+    }
+    client.println("Temperature: " +
+                   String(temp_c_values.Average(minutes(10))));
+    client.println("Humidity: " + String(humidity_values.Average(minutes(10))));
+    client.println("AQI: " + String(aqi_values.Average(minutes(10))));
+    client.stop();
+  }
 }
