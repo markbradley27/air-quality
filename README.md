@@ -1,3 +1,5 @@
+> Note: Further development is happening over in [github.com/markbradley27/henrietta](https://github.com/markbradley27/henrietta/tree/main/src/boards/enviro_micky).
+
 # air-quality
 
 ### pin layout
