@@ -5,9 +5,7 @@
 | ESP | PM2.5 | OLED | DHT22 | Buttons |
 | --- | ----- | ---- | ----- | ------- |
 | Vin | VCC   |      |       |         |
-| G   | G     |      |       |         |
-| G   |       | G    |       |         |
-| 3V3 |       | VCC  |       |         |
+| 3V3 |       | VCC  | VCC   |         |
 | D1  |       | SCL  |       |         |
 | D2  |       | SDA  |       |         |
 | D3  |       |      | DATA  |         |
